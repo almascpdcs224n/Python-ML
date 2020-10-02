@@ -169,7 +169,7 @@ print(data)
 # print(my_tup)
 
 # Data exploration with pandas and matplotlib
-% matplotlib inline
+#% matplotlib inline
 from sklearn import datasets
 
 # iris is loaded as a dict object; you can check the keys with iris.keys()
@@ -188,4 +188,103 @@ iris_df.head()
 iris_df.plot()
 
 # Explore the data
+
+#This example demonstrates the Python data model using a simple implementation of playing cards and decks.
+
+#Card is a namedtuple that represents a playing card.
+import collections
+Card = collections.namedtuple('Card', ['rank', 'suit'])
+
+# FrenchDeck is a class that represents a deck of cards.
+class FrenchDeck:
+    ranks = [str(n) for n in range(2, 11)] + list('JQKA')
+    suits = 'spades diamonds clubs hearts'.split()
+
+    def __init__(self):
+        self._cards = [Card(rank, suit) for suit in self.suits
+                                        for rank in self.ranks]
+    def __len__(self):
+        return len(self._cards)
+
+    def __getitem__(self, position):
+        return self._cards[position]
+
+# Instantiate a Card object as if Card were a class.
+beer_card = Card('7', 'diamonds')
+beer_card
+# Access the fields of a card by name.
+beer_card.rank, beer_card.suit
+# or by index
+beer_card[0], beer_card[1]
+
+# Function that generates a string representation of a card
+def card_to_str(card):
+    return '%s of %s' % card
+
+card_to_str(beer_card)
+
+# Here's how we can make that function behave like a method. When we pass a card to print, Python invokes the special method __str__
+Card.__str__ = card_to_str
+print(beer_card)
+
+# instantiate a FrenchDeck
+deck = FrenchDeck()
+len(deck)
+# get-item method
+deck[3] # or deck[:3]
+
+# FrenchDeck provides __len__ and __getitem__, it is considered a sequence, which means that the in operator works:
+Card('Q', 'hearts') in deck
+Card('Z', 'clubs') in deck
+
+# Implementation 
+#for card in deck:
+#    print(card)
+
+#from random import choice
+#choice(deck)
+
+#for card in sorted(deck):
+#    print(card)
+
+#if we want an ordering that makes more sense for cards, 
+# we can define a function that maps from a card to an integer
+suit_values = dict(spades=3, hearts=2, diamonds=1, clubs=0)
+
+def spades_high_ordering(card):
+    rank_value = FrenchDeck.ranks.index(card.rank)
+    return rank_value * len(suit_values) + suit_values[card.suit]
+
+spades_high_ordering(Card('2', 'clubs'))
+spades_high_ordering(Card('A', 'spades'))
+
+#for card in sorted(deck, key=spades_high_ordering):
+#    print(card)
+
+# Define a new ordering that sorts the cards by suit first and then by rank, so all clubs come first, followed by all diamonds, etc.
+# Solution
+def spades_high_ordering_suit_first(card):
+    rank_value = FrenchDeck.ranks.index(card.rank)
+    return suit_values[card.suit] * len(FrenchDeck.ranks) + rank_value
+
+#for card in sorted(deck, key=spades_high_ordering_suit_first):
+#    print(card)
+
+# Write a method called setcard that takes a deck, an index, and a card, and assigns the card to the deck at the given position. 
+# Then shuffle the deck using random.shuffle.
+
+# Solution
+def setcard(deck, position, card):
+    deck._cards[position] = card
+    
+FrenchDeck.__setitem__ = setcard
+deck[0] = Card('A', 'spades')
+
+from random import shuffle
+shuffle(deck)
+for card in deck:
+    print(card)
+
+#We should have two Aces of spades now, which we can confirm by checking the number of unique cards
+len(set(deck))
 
